@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
-from src.infrastrucutre.database.schema import books
+from src.infrastructure.database.schema import books
 
 
 class BooksRepo:

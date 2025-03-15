@@ -12,8 +12,8 @@ books = Table(
     Column('title', String),
     Column('author', String),
     Column('is_borrowed', Boolean),
-    # Column('borrowed_date', DateTime, nullable=True),
-    # Column('borrowed_by', ForeignKey('members.members_id'))
+    Column('borrowed_date', DateTime, nullable=True),
+    Column('borrowed_by', ForeignKey('members.members_id'))
 )
 
 members = Table(

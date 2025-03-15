@@ -1,0 +1,14 @@
+# Add a member
+curl -X POST http://127.0.0.1:5000/members -H "Content-Type: application/json" -d '{"name": "John Doe", "email": "john@example.com"}'
+
+# Get all members
+curl -X GET http://127.0.0.1:5000/members
+
+# Get a member by ID
+curl -X GET http://127.0.0.1:5000/members/{member_id}
+
+# Update a member
+curl -X PUT http://127.0.0.1:5000/members/{member_id} -H "Content-Type: application/json" -d '{"name": "John Updated", "email": "john.new@example.com"}'
+
+# Delete a member
+curl -X DELETE http://127.0.0.1:5000/members/{member_id}
