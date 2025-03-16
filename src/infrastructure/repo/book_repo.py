@@ -1,5 +1,6 @@
-from typing import Dict, List, Optional
 import uuid
+from typing import Dict, List, Optional
+
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
 
@@ -47,7 +48,7 @@ class BooksRepo:
             author=book_data.get("author", current_book["author"]),
             is_borrowed=book_data.get("is_borrowed", current_book["is_borrowed"]),
             borrowed_date=book_data.get("borrowed_date", current_book["borrowed_date"]),
-            borrowed_by=str(book_data.get("borrowed_by"))
+            borrowed_by=book_data.get("borrowed_by") if book_data.get("borrowed_by") is not None else None
         ).returning(books)
     
         result = self.session.execute(query)

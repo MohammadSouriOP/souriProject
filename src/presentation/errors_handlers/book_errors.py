@@ -1,5 +1,6 @@
 from flask import jsonify
 
+
 class BookErrors:
     @staticmethod
     def book_not_found():

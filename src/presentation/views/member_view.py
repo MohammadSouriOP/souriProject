@@ -1,5 +1,5 @@
 from typing import Any, Dict, Optional
-
+import uuid
 from flask import Response, abort, jsonify, make_response, request
 from flask.views import MethodView
 
@@ -10,12 +10,13 @@ class MembersView(MethodView):
     def __init__(self) -> None:
         self.service = MembersService()
 
-    def get(self, members_id: Optional[str] = None) -> Response:
+    def get(self, members_id: Optional[uuid.UUID] = None) -> Response:
         if members_id is None:
             members = self.service.get_all()
             return make_response(jsonify(members or []), 200)
 
-        member: Optional[Dict[str, Any]] = self.service.get_by_id(members_id)
+        members_id_str = str(members_id)
+        member: Optional[Dict[str, Any]] = self.service.get_by_id(members_id_str)
         if member is None:
             abort(404, description="Member not found")
 
@@ -39,6 +40,7 @@ class MembersView(MethodView):
         abort(500, description="Error adding member")
 
     def put(self, members_id: str) -> Response:
+        members_id_str = str(members_id_str)
         data = request.get_json()
         if not data:
             abort(400, description="Invalid JSON data")
@@ -54,7 +56,8 @@ class MembersView(MethodView):
         return jsonify(message="Member updated successfully")
 
     def delete(self, members_id: str) -> Response:
-        result = self.service.delete(members_id)
+        members_id_str = str(members_id)
+        result = self.service.delete(members_id_str)
         if not result:
             abort(404, description="Member not found")
 

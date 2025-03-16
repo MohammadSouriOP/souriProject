@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
+
 from src.domain.base_entity import BaseEntity
 
 

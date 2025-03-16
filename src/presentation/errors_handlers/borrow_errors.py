@@ -1,5 +1,6 @@
 from flask import jsonify
 
+
 class BorrowErrors:
     
     @staticmethod

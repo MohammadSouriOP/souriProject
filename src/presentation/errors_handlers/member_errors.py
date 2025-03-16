@@ -1,5 +1,6 @@
 from flask import jsonify
 
+
 class MemberErrors:
     @staticmethod
     def member_not_found():
