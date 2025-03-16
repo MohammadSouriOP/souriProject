@@ -1,8 +1,6 @@
 from flask import jsonify
 
-from src.presentation.errors_handlers.book_errors import BookErrors
 from src.presentation.errors_handlers.borrow_errors import BorrowErrors
-from src.presentation.errors_handlers.member_errors import MemberErrors
 
 
 def error_handlers(app):

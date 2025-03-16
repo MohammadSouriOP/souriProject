@@ -17,7 +17,8 @@ class BookEntity(BaseEntity):
 
     def borrow(self, member_id: UUID):
         if self.is_borrowed:
-            raise ValueError('This book is already borrowed by another member.')
+            raise ValueError(
+                'This book is already borrowed by another member.')
         self.is_borrowed = True
         self.borrowed_date = datetime.utcnow()
         self.borrowed_by = member_id

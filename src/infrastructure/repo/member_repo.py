@@ -17,7 +17,8 @@ class MembersRepo:
         return [dict(row) for row in result.mappings().all()]
 
     def get_by_id(self, members_id: str) -> Optional[Dict]:
-        query = select(members).where(members.c.members_id == uuid.UUID(members_id))
+        query = select(members).where(
+            members.c.members_id == uuid.UUID(members_id))
         result = self.session.execute(query).mappings().first()
         return dict(result) if result else None
 

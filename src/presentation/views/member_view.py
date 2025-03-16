@@ -1,5 +1,6 @@
-from typing import Any, Dict, Optional
 import uuid
+from typing import Any, Dict, Optional
+
 from flask import Response, abort, jsonify, make_response, request
 from flask.views import MethodView
 
@@ -16,7 +17,8 @@ class MembersView(MethodView):
             return make_response(jsonify(members or []), 200)
 
         members_id_str = str(members_id)
-        member: Optional[Dict[str, Any]] = self.service.get_by_id(members_id_str)
+        member: Optional[Dict[str, Any]] = self.service.get_by_id(
+            members_id_str)
         if member is None:
             abort(404, description="Member not found")
 
@@ -39,8 +41,8 @@ class MembersView(MethodView):
             return make_response(jsonify(result), 201)
         abort(500, description="Error adding member")
 
-    def put(self, members_id: str) -> Response:
-        members_id_str = str(members_id_str)
+    def put(self, members_id: uuid.UUID) -> Response:
+        members_id_str = str(members_id)
         data = request.get_json()
         if not data:
             abort(400, description="Invalid JSON data")
@@ -50,7 +52,7 @@ class MembersView(MethodView):
             "email": data.get("email"),
         }
 
-        result = self.service.update(members_id, entity)
+        result = self.service.update(members_id_str, entity)
         if not result:
             abort(404, description="Member not found")
         return jsonify(message="Member updated successfully")

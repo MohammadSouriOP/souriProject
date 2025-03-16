@@ -2,10 +2,11 @@ from flask import jsonify
 
 
 class BorrowErrors:
-    
+
     @staticmethod
     def already_borrowed():
-        return jsonify({"error": "This book is already borrowed by another member."}), 400
+        return jsonify({
+            "error": "This book is already borrowed by another member."}), 400
 
     @staticmethod
     def book_not_found():
@@ -22,6 +23,7 @@ class BorrowErrors:
     @staticmethod
     def unknown_error():
         return jsonify({"error": "Something went wrong"}), 500
+
 
 def handle_borrow_errors(error):
     if isinstance(error, ValueError):

@@ -19,7 +19,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('books', sa.Column('book_id', sa.Integer(), autoincrement=True, nullable=True))
+    op.add_column('books', sa.Column('book_id', sa.Integer(),
+                                     autoincrement=True, nullable=True))
 
     op.execute("UPDATE books SET book_id = id")
 
@@ -29,7 +30,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.add_column('books', sa.Column('id', sa.Integer(), autoincrement=True, nullable=True))
+    op.add_column('books', sa.Column('id', sa.Integer(),
+                                     autoincrement=True, nullable=True))
 
     op.execute("UPDATE books SET id = book_id")
 
