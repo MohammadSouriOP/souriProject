@@ -1,7 +1,9 @@
 from flask import Flask
 
 from src.presentation.views.books_view import BooksView
+from src.presentation.views.borrow_view import BorrowView
 from src.presentation.views.member_view import MembersView
+from src.presentation.views.return_view import ReturnView
 
 
 def routes(app: Flask):
@@ -21,10 +23,14 @@ def routes(app: Flask):
         view_func=members_view,
         methods=['GET', 'PUT', 'DELETE'])
 
-    # borrow_view = BorrowView.as_view('borrow_view')
-    # app.add_url_rule('/borrow/<int:book_id>/<int:member_id>',
-    # view_func=borrow_view, methods=['POST'])
+    borrow_view = BorrowView.as_view('borrow_view')
+    app.add_url_rule(
+        '/borrow/<int:book_id>/<uuid:members_id>',
+        view_func=borrow_view,
+        methods=['POST'])
 
-    # return_view = returnView.as_view('return_view')
-    # app.add_url_rule('/return/<int:book_id>',
-    #  view_func=return_view, methods=['POST'])
+    return_view = ReturnView.as_view('return_view')
+    app.add_url_rule(
+        '/return/<int:book_id>',
+        view_func=return_view,
+        methods=['POST'])

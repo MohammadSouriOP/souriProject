@@ -1,3 +1,5 @@
+# Members API
+
 # Add a member
 curl -X POST http://127.0.0.1:5000/members -H "Content-Type: application/json" -d '{"name": "John Doe", "email": "john@example.com"}'
 
@@ -12,3 +14,32 @@ curl -X PUT http://127.0.0.1:5000/members/{member_id} -H "Content-Type: applicat
 
 # Delete a member
 curl -X DELETE http://127.0.0.1:5000/members/{member_id}
+
+# Books API
+
+# Add a Book
+curl -X POST http://127.0.0.1:5000/books \
+     -H "Content-Type: application/json" \
+     -d '{"title": "The Great Gatsby", "author": "F. Scott Fitzgerald"}'
+
+# Get All Books
+curl -X GET http://127.0.0.1:5000/books
+
+# Get a Book by ID
+curl -X GET http://127.0.0.1:5000/books/{book_id}
+
+# Update a Book
+curl -X PUT http://127.0.0.1:5000/books/{book_id} \
+     -H "Content-Type: application/json" \
+     -d '{"title": "New Title", "author": "New Author"}'
+
+# Delete a Book
+curl -X DELETE http://127.0.0.1:5000/books/{book_id}
+
+# Borrow & Return API
+
+# Borrow a Book
+curl -X POST http://127.0.0.1:5000/borrow/{book_id}/{member_id}
+
+# Return a Book
+curl -X POST http://127.0.0.1:5000/return/{book_id}
