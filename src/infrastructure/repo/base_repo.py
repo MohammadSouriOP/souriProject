@@ -1,4 +1,4 @@
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Type, TypeVar
 
 from sqlalchemy import Table, delete, insert, select, update
 from sqlalchemy.orm import Session
@@ -13,7 +13,7 @@ class BaseRepo(Generic[E]):
         self.entity = entity
         self.table = table
 
-    def create(self, entity: E, session: Session) -> Optional[E]:
+    def create(self, entity: E, session: Session) -> E | None:
         data = {key: value for key, value in vars(entity)
                 .items() if key != 'id'}
         sql = insert(self.table).values(**data).returning(*self.table.columns)
@@ -26,7 +26,7 @@ class BaseRepo(Generic[E]):
         result = session.execute(sql)
         return [self.entity(**row._mapping) for row in result.fetchall()]
 
-    def get(self, id: int, session: Session) -> Optional[E]:
+    def get(self, id: int, session: Session) -> E | None:
         sql = select(self.table).where(self.table.c.id == id)
         result = session.execute(sql).fetchone()
         return self.entity(**result._mapping) if result else None

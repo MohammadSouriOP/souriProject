@@ -1,5 +1,4 @@
 import uuid
-from typing import Optional
 
 from src.domain.books_entity import BookEntity
 from src.infrastructure.unit_of_work.unit_of_work import UnitOfWork
@@ -39,7 +38,7 @@ class BooksService:
                 uow.commit()
             return result
 
-    def borrow_book(self, book_id: int, members_id: str) -> Optional[dict]:
+    def borrow_book(self, book_id: int, members_id: str) -> dict | None:
         with UnitOfWork() as uow:
             assert uow.books_repo is not None
             assert uow.members_repo is not None
@@ -70,7 +69,7 @@ class BooksService:
                 return {"message": "Book borrowed successfully"}
             return {"error": "Failed to borrow book"}
 
-    def return_book(self, book_id: int) -> Optional[dict]:
+    def return_book(self, book_id: int) -> dict | None:
         with UnitOfWork() as uow:
             assert uow.books_repo is not None
 

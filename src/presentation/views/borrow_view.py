@@ -13,7 +13,7 @@ class BorrowView(MethodView):
         try:
             result = self.service.borrow_book(book_id, members_id)
             if result is None:
-                return BorrowErrors.unknown_error()
+                return BorrowErrors.book_not_found()
             return jsonify(result)
 
         except ValueError:

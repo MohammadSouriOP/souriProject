@@ -4,7 +4,7 @@ from src.infrastructure.unit_of_work.unit_of_work import UnitOfWork
 class MembersService:
     def get_all(self):
         with UnitOfWork() as uow:
-            assert uow.members_repo is not None  # Ensure repo is initialized
+            assert uow.members_repo is not None
             return uow.members_repo.get_all()
 
     def get_by_id(self, member_id: str):

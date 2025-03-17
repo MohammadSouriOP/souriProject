@@ -1,26 +1,27 @@
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from flask import Response, abort, jsonify, make_response, request
 from flask.views import MethodView
 
 from src.application.members_services import MembersService
+from src.presentation.errors_handlers.member_errors import MemberErrors
 
 
 class MembersView(MethodView):
     def __init__(self) -> None:
         self.service = MembersService()
 
-    def get(self, members_id: Optional[uuid.UUID] = None) -> Response:
+    def get(self, members_id: uuid.UUID | None = None) -> Response:
         if members_id is None:
             members = self.service.get_all()
             return make_response(jsonify(members or []), 200)
 
         members_id_str = str(members_id)
-        member: Optional[Dict[str, Any]] = self.service.get_by_id(
+        member: Dict[str, Any] | None = self.service.get_by_id(
             members_id_str)
         if member is None:
-            abort(404, description="Member not found")
+            return MemberErrors.member_not_found()
 
         return jsonify(member)
 
@@ -45,7 +46,7 @@ class MembersView(MethodView):
         members_id_str = str(members_id)
         data = request.get_json()
         if not data:
-            abort(400, description="Invalid JSON data")
+            return make_response(jsonify({"error": "Invalid JSON data"}), 400)
 
         entity = {
             "name": data.get("name"),
@@ -54,13 +55,13 @@ class MembersView(MethodView):
 
         result = self.service.update(members_id_str, entity)
         if not result:
-            abort(404, description="Member not found")
+            return make_response(jsonify({"error": "Member not found"}), 404)
         return jsonify(message="Member updated successfully")
 
     def delete(self, members_id: str) -> Response:
         members_id_str = str(members_id)
         result = self.service.delete(members_id_str)
         if not result:
-            abort(404, description="Member not found")
+            return make_response(jsonify({"error": "Member not found"}), 404)
 
         return jsonify(message="Member deleted successfully")

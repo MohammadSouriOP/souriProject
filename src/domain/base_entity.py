@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
 class BaseEntity:
-    id: Optional[int] = field(default=None)
+    id: int | None = field(default=None)
 
     def update(self, data: dict[str, Any]) -> 'BaseEntity':
         for key, value in data.items():

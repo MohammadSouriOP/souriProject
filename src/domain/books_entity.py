@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from src.domain.base_entity import BaseEntity
@@ -8,12 +7,12 @@ from src.domain.base_entity import BaseEntity
 
 @dataclass
 class BookEntity(BaseEntity):
-    book_id: Optional[int] = field(default=None)
+    book_id: int | None = field(default=None)
     title: str = ''
     author: str = ''
     is_borrowed: bool = field(default=False)
-    borrowed_date: Optional[datetime] = field(default=None)
-    borrowed_by: Optional[UUID] = field(default=None)
+    borrowed_date: datetime | None = field(default=None)
+    borrowed_by: UUID | None = field(default=None)
 
     def borrow(self, member_id: UUID):
         if self.is_borrowed:

@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.orm import Session
@@ -16,13 +16,13 @@ class MembersRepo:
         result = self.session.execute(query)
         return [dict(row) for row in result.mappings().all()]
 
-    def get_by_id(self, members_id: str) -> Optional[Dict]:
+    def get_by_id(self, members_id: str) -> Dict | None:
         query = select(members).where(
             members.c.members_id == uuid.UUID(members_id))
         result = self.session.execute(query).mappings().first()
         return dict(result) if result else None
 
-    def add(self, member_data: Dict) -> Optional[Dict]:
+    def add(self, member_data: Dict) -> Dict | None:
         member_data["members_id"] = uuid.uuid4()
         query = insert(members).values(
             members_id=member_data.get("members_id"),
@@ -34,7 +34,7 @@ class MembersRepo:
         self.session.commit()
         return dict(inserted_member) if inserted_member else None
 
-    def update(self, members_id: str, member_data: Dict) -> Optional[Dict]:
+    def update(self, members_id: str, member_data: Dict) -> Dict | None:
         query = update(members).where(
             members.c.members_id == members_id).values(
             name=member_data.get("name"),
