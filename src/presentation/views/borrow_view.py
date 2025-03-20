@@ -9,9 +9,10 @@ class BorrowView(MethodView):
     def __init__(self) -> None:
         self.service = BooksService()
 
-    def post(self, book_id: int, members_id: str) -> Response:
+    def post(self, book_id: str, member_id: str) -> Response:
         try:
-            result = self.service.borrow_book(book_id, members_id)
+            print('teeeeeeeeeeeeeeeeeeeeest')
+            result = self.service.borrow_book(book_id, member_id)
             if result is None:
                 return BorrowErrors.book_not_found()
             return jsonify(result)

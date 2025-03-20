@@ -1,6 +1,7 @@
 from flask import jsonify
-
+from sqlalchemy.exc import IntegrityError
 from src.presentation.errors_handlers.borrow_errors import BorrowErrors
+from src.presentation.errors_handlers.member_errors import MemberErrors
 
 
 def error_handlers(app):
@@ -19,5 +20,12 @@ def error_handlers(app):
 
     app.register_error_handler(ValueError, BorrowErrors.already_borrowed)
     app.register_error_handler(KeyError, BorrowErrors.book_not_found)
+
+    def handle_integrity_error(error):
+        if "duplicate key value violates unique constraint" in str(error):
+            return MemberErrors.email_already_exists()
+        return MemberErrors.database_error()
+
+    app.register_error_handler(IntegrityError, handle_integrity_error)
 
     app.register_error_handler(404, not_found)

@@ -10,7 +10,7 @@ def routes(app: Flask):
     books_view = BooksView.as_view('books_view')
 
     app.add_url_rule('/books', view_func=books_view, methods=['GET', 'POST'])
-    app.add_url_rule('/books/<int:book_id>',
+    app.add_url_rule('/books/<string:book_id>',
                      view_func=books_view, methods=['GET', 'PUT',
                                                     'DELETE', 'PATCH'])
 
@@ -20,18 +20,18 @@ def routes(app: Flask):
         view_func=members_view,
         methods=['GET', 'POST'])
     app.add_url_rule(
-        '/members/<uuid:members_id>',
+        '/members/<string:member_id>',
         view_func=members_view,
         methods=['GET', 'PUT', 'DELETE', 'PATCH'])
 
     borrow_view = BorrowView.as_view('borrow_view')
     app.add_url_rule(
-        '/borrow/<int:book_id>/<uuid:members_id>',
+        '/borrow/<string:book_id>/<string:member_id>',
         view_func=borrow_view,
         methods=['POST'])
 
     return_view = ReturnView.as_view('return_view')
     app.add_url_rule(
-        '/return/<int:book_id>',
+        '/return/<string:book_id>',
         view_func=return_view,
         methods=['POST'])

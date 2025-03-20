@@ -1,11 +1,11 @@
 from typing import Any, Generic, List, Type, TypeVar
 
 from sqlalchemy import Table, delete, insert, select, update
-from sqlalchemy.orm import Session
+from sqlalchemy.engine import Connection
 
 from src.domain.base_entity import BaseEntity
 
-E = TypeVar('E', bound=BaseEntity)
+E = TypeVar("E", bound=BaseEntity)
 
 
 class BaseRepo(Generic[E]):
@@ -13,34 +13,42 @@ class BaseRepo(Generic[E]):
         self.entity = entity
         self.table = table
 
-    def create(self, entity: E, session: Session) -> E | None:
-        data = {key: value for key, value in vars(entity)
-                .items() if key != 'id'}
-        sql = insert(self.table).values(**data).returning(*self.table.columns)
-        result = session.execute(sql)
-        inserted_row = result.fetchone()
-        return self.entity(**inserted_row._mapping) if inserted_row else None
+    def create(self, entity: E, connection: Connection) -> E | None:
+        data = {key: value for key, value in
+                vars(entity).items() if key != "id"}
+        if not data:
+            return None
 
-    def get_all(self, session: Session) -> List[E]:
+        sql = insert(self.table).values(**data).returning(*self.table.columns)
+
+        try:
+            result = connection.execute(sql)
+            inserted_row = result.first()
+            return self.entity(**inserted_row._mapping) if inserted_row else None
+        except InterruptedError as e:
+            if 'duplicate key value violates unique constraint' in str(e):
+                raise ValueError(
+                    'The email address is already in use, Please try another one.')
+            raise
+
+    def get_all(self, connection: Connection) -> List[E]:
         sql = select(self.table)
-        result = session.execute(sql)
+        result = connection.execute(sql)
         return [self.entity(**row._mapping) for row in result.fetchall()]
 
-    def get(self, id: int, session: Session) -> E | None:
+    def get(self, id: str, connection: Connection) -> E | None:
         sql = select(self.table).where(self.table.c.id == id)
-        result = session.execute(sql).fetchone()
+        result = connection.execute(sql).first()
         return self.entity(**result._mapping) if result else None
 
-    def update(self, id: int, entity_data:
-               dict[str, Any], session: Session) -> bool:
-        sql = update(self.table).where(self.table.c.id == id
-                                       ).values(**entity_data)
-        result = session.execute(sql)
-        session.commit()
-        return result.rowcount > 0 if hasattr(result, "rowcount") else False
+    def update(self, id: str, entity_data: dict[str, Any],
+               connection: Connection) -> bool:
+        sql = update(self.table).where(
+            self.table.c.id == id).values(**entity_data)
+        result = connection.execute(sql)
+        return result.rowcount > 0
 
-    def delete(self, id: int, session: Session) -> bool:
+    def delete(self, id: str, connection: Connection) -> bool:
         sql = delete(self.table).where(self.table.c.id == id)
-        result = session.execute(sql)
-        session.commit()
-        return result.rowcount > 0 if hasattr(result, "rowcount") else False
+        result = connection.execute(sql)
+        return result.rowcount > 0

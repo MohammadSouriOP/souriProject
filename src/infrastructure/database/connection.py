@@ -1,11 +1,10 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.engine import Connection, Engine
 
 DATABASE_URL = "postgresql://souri:souri@localhost:5432/souri_db"
 
-engine = create_engine(DATABASE_URL, echo=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+engine: Engine = create_engine(DATABASE_URL, echo=True)
 
 
-def get_session() -> Session:
-    return SessionLocal()
+def get_connection() -> Connection:
+    return engine.connect()

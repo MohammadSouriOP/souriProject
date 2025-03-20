@@ -7,6 +7,10 @@ class MemberErrors:
         return jsonify({"error": "Member not found"}), 404
 
     @staticmethod
+    def email_already_exists():
+        return jsonify({"error": "Email already exists"}), 400
+
+    @staticmethod
     def database_error():
         return jsonify({"error": "Database error"}), 500
 

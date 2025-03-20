@@ -7,7 +7,6 @@ from src.domain.base_entity import BaseEntity
 
 @dataclass
 class BookEntity(BaseEntity):
-    book_id: int | None = field(default=None)
     title: str = ''
     author: str = ''
     is_borrowed: bool = field(default=False)

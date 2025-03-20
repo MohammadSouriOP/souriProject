@@ -8,4 +8,4 @@ from src.domain.base_entity import BaseEntity
 class MemberEntity(BaseEntity):
     name: str = ''
     email: str = ''
-    member_id: uuid.UUID = field(default_factory=uuid.uuid4)
+    # member_id: uuid.UUID = field(default_factory=uuid.uuid4)
