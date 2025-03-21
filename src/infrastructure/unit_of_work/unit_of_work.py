@@ -13,19 +13,19 @@ class UnitOfWork:
         self.connection: Connection = get_connection()
         self.books_repo: BooksRepo = BooksRepo(self.connection)
         self.members_repo: MembersRepo = MembersRepo(self.connection)
-        self.transaction: RootTransaction | None = None  # Ensure it's properly initialized
+        self.transaction: RootTransaction | None = None
 
-    def __enter__(self) -> "UnitOfWork":
-        self.transaction = self.connection.begin()  # Always begin a new transaction
+    def __enter__(self) -> 'UnitOfWork':
+        self.transaction = self.connection.begin()
         return self
 
     def commit(self) -> None:
         if not self.transaction or not self.transaction.is_active:
-            raise RuntimeError("Cannot commit: Transaction is inactive.")
+            raise RuntimeError('Cannot commit: Transaction is inactive.')
         try:
             self.transaction.commit()
         except Exception as e:
-            print("Error during commit, rolling back...")
+            print('Error during commit, rolling back...')
             self.rollback()
             raise e
 
@@ -41,7 +41,7 @@ class UnitOfWork:
         traceback: TracebackType | None
     ) -> None:
         if exc_type:
-            print("Rolling back due to exception:", exc_type)
+            print('Rolling back due to exception:', exc_type)
             self.rollback()
         if self.connection:
             self.connection.close()

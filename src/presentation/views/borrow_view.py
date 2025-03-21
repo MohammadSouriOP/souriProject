@@ -9,9 +9,8 @@ class BorrowView(MethodView):
     def __init__(self) -> None:
         self.service = BooksService()
 
-    def post(self, book_id: str, member_id: str) -> Response:
+    def post(self, book_id: int, member_id: str) -> Response:
         try:
-            print('teeeeeeeeeeeeeeeeeeeeest')
             result = self.service.borrow_book(book_id, member_id)
             if result is None:
                 return BorrowErrors.book_not_found()
@@ -24,5 +23,5 @@ class BorrowView(MethodView):
             return BorrowErrors.book_not_found()
 
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            print(f'Unexpected error: {e}')
             return BorrowErrors.database_error()

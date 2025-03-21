@@ -17,14 +17,14 @@ class BooksRepo(BaseRepo[BookEntity]):
                                       connection: Connection) -> Dict | None:
         query = (
             select(
-                books.c.book_id,
+                books.c.id,
                 books.c.title,
                 books.c.author,
                 books.c.is_borrowed,
                 books.c.borrowed_date,
-                members.c.member_id,
-                members.c.name.label("member_name"),
-                members.c.email.label("member_email"),
+                members.c.id,
+                members.c.name.label('member_name'),
+                members.c.email.label('member_email'),
             )
             .join(members, books.c.borrowed_by == members.c.member_id)
             .where(books.c.book_id == book_id)

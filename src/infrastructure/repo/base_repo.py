@@ -5,7 +5,7 @@ from sqlalchemy.engine import Connection
 
 from src.domain.base_entity import BaseEntity
 
-E = TypeVar("E", bound=BaseEntity)
+E = TypeVar('E', bound=BaseEntity)
 
 
 class BaseRepo(Generic[E]):
@@ -15,7 +15,7 @@ class BaseRepo(Generic[E]):
 
     def create(self, entity: E, connection: Connection) -> E | None:
         data = {key: value for key, value in
-                vars(entity).items() if key != "id"}
+                vars(entity).items() if key != 'id'}
         if not data:
             return None
 
@@ -24,11 +24,14 @@ class BaseRepo(Generic[E]):
         try:
             result = connection.execute(sql)
             inserted_row = result.first()
-            return self.entity(**inserted_row._mapping) if inserted_row else None
+            return self.entity(**inserted_row._mapping
+                               ) if inserted_row else None
         except InterruptedError as e:
             if 'duplicate key value violates unique constraint' in str(e):
-                raise ValueError(
-                    'The email address is already in use, Please try another one.')
+                raise ValueError('''
+                    The email address is already in use,
+                    Please try another one.
+                    ''')
             raise
 
     def get_all(self, connection: Connection) -> List[E]:

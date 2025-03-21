@@ -24,7 +24,7 @@ class MembersService:
             result = uow.members_repo.update(
                 str(member_id), member_data, uow.connection)
             if not result:
-                print("Update failed, transaction might be inactive.")
+                print('Update failed, transaction might be inactive.')
                 return False
             if result:
                 uow.commit()

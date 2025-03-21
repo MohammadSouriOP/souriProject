@@ -10,6 +10,6 @@ class ReturnView(MethodView):
 
     def post(self, book_id: int) -> Response:
         result = self.service.return_book(book_id) or {}
-        if "error" in result:
+        if 'error' in result:
             return make_response(jsonify(result), 400)
         return jsonify(result)
