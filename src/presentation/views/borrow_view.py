@@ -1,27 +1,31 @@
-from flask import Response, jsonify
-from flask.views import MethodView
+from uuid import UUID
+
+from fastapi import APIRouter, HTTPException
 
 from src.application.books_services import BooksService
+from src.domain.models.book_model import BookModel
 from src.presentation.errors_handlers.borrow_errors import BorrowErrors
 
+router = APIRouter()
+service = BooksService()
 
-class BorrowView(MethodView):
-    def __init__(self) -> None:
-        self.service = BooksService()
 
-    def post(self, book_id: int, member_id: str) -> Response:
-        try:
-            result = self.service.borrow_book(book_id, member_id)
-            if result is None:
-                return BorrowErrors.book_not_found()
-            return jsonify(result)
+@router.post("/{book_id}/{member_id}", response_model=BookModel)
+def borrow_book(book_id: int, member_id: UUID):
+    try:
+        result = service.borrow_book(book_id, str(member_id))
 
-        except ValueError:
-            return BorrowErrors.already_borrowed()
+        if result is None:
+            raise HTTPException(status_code=404, detail="Book not found")
 
-        except KeyError:
-            return BorrowErrors.book_not_found()
+        return result.to_model()
 
-        except Exception as e:
-            print(f'Unexpected error: {e}')
-            return BorrowErrors.database_error()
+    except ValueError:
+        return BorrowErrors.already_borrowed()
+
+    except KeyError:
+        return BorrowErrors.member_not_found()
+
+    except Exception as e:
+        print("DEBUG: Unexpected error →", e)
+        return BorrowErrors.database_error()

@@ -1,15 +1,29 @@
-from flask import Response, jsonify, make_response
-from flask.views import MethodView
+from fastapi import APIRouter
 
 from src.application.books_services import BooksService
+from src.domain.models.book_model import BookModel
+from src.presentation.errors_handlers.return_errors import ReturnErrors
+
+router = APIRouter()
+service = BooksService()
 
 
-class ReturnView(MethodView):
-    def __init__(self) -> None:
-        self.service = BooksService()
+@router.post("/{book_id}", response_model=BookModel)
+def return_book(book_id: int):
+    try:
+        result = service.return_book(book_id)
 
-    def post(self, book_id: int) -> Response:
-        result = self.service.return_book(book_id) or {}
-        if 'error' in result:
-            return make_response(jsonify(result), 400)
-        return jsonify(result)
+        if result is None:
+            return ReturnErrors.failed_to_return()
+
+        return result.to_model()
+
+    except KeyError:
+        return ReturnErrors.book_not_found()
+
+    except ValueError:
+        return ReturnErrors.book_not_borrowed()
+
+    except Exception as e:
+        print("DEBUG: Unexpected error →", e)
+        return ReturnErrors.unknown_error()

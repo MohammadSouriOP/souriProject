@@ -1,23 +1,28 @@
-from flask import jsonify
+from fastapi.responses import JSONResponse
 
 
 class MemberErrors:
     @staticmethod
     def member_not_found():
-        return jsonify({'error': 'Member not found'}), 404
+        return JSONResponse(status_code=404,
+                            content={"error": "Member not found"})
 
     @staticmethod
     def email_already_exists():
-        return jsonify({'error': 'Email already exists'}), 400
+        return JSONResponse(status_code=400,
+                            content={"error": "Email already exists"})
 
     @staticmethod
     def database_error():
-        return jsonify({'error': 'Database error'}), 500
+        return JSONResponse(status_code=500,
+                            content={"error": "Database error"})
 
     @staticmethod
     def unknown_error():
-        return jsonify({'error': 'Something went wrong'}), 500
+        return JSONResponse(status_code=500,
+                            content={"error": "Something went wrong"})
 
     @staticmethod
     def invalid_uuid():
-        return jsonify({'error': 'Invalid UUID format'}), 400
+        return JSONResponse(status_code=400,
+                            content={"error": "Invalid UUID format"})

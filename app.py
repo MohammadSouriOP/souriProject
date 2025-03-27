@@ -1,18 +1,9 @@
-from flask import Flask
+from fastapi import FastAPI
 
 from src.presentation.errors_handlers.error_handlers import error_handlers
-from src.presentation.routes import routes
+from src.presentation.routes import router as main_router
 
+app = FastAPI()
 
-def create_app():
-    app = Flask(__name__)
-
-    routes(app)
-    error_handlers(app)
-
-    return app
-
-
-if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
+app.include_router(main_router)
+error_handlers(app)

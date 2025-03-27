@@ -1,26 +1,22 @@
 from fastapi.responses import JSONResponse
 
 
-class BookErrors:
+class ReturnErrors:
     @staticmethod
     def book_not_found():
         return JSONResponse(status_code=404,
                             content={"error": "Book not found"})
 
     @staticmethod
-    def book_already_borrowed():
-        return JSONResponse(status_code=400,
-                            content={"error": "Book is already borrowed."})
-
-    @staticmethod
     def book_not_borrowed():
         return JSONResponse(status_code=400,
-                            content={"error": "Book is not borrowed."})
+                            content={"error":
+                                     "Book is not currently borrowed"})
 
     @staticmethod
-    def database_error():
+    def failed_to_return():
         return JSONResponse(status_code=500,
-                            content={"error": "Database error"})
+                            content={"error": "Failed to return book"})
 
     @staticmethod
     def unknown_error():
