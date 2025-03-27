@@ -39,52 +39,51 @@ class BooksService:
                 uow.commit()
             return result
 
-    def borrow_book(self, book_id: int, member_id: str) -> dict | None:
+    def borrow_book(self, book_id: int, member_id: str) -> BookEntity | None:
         with UnitOfWork() as uow:
             assert uow.books_repo is not None
             assert uow.members_repo is not None
 
             book_data = uow.books_repo.get(str(book_id), uow.connection)
             if not book_data:
-                return {'error': 'Book not found'}
+                return None
 
-            book = book_data
+            book: BookEntity = book_data
 
             if book.is_borrowed:
-                return {'error': 'Book is already borrowed'}
+                raise ValueError("Book is already borrowed")
 
-            member_id = str(member_id)
-            member = uow.members_repo.get_by_id(member_id, uow.connection)
+            member = uow.members_repo.get_by_id(str(member_id), uow.connection)
             if not member:
-                return {'error': 'Member not found'}
+                raise KeyError("Member not found")
 
-            book_entity = book
-            book_entity.borrow(uuid.UUID(member_id))
+            book.borrow(uuid.UUID(member_id))
 
             updated = uow.books_repo.update(str(book_id), {
-                'is_borrowed': True,
-                'borrowed_date': book_entity.borrowed_date,
-                'borrowed_by': uuid.UUID(member_id)
+                "is_borrowed": True,
+                "borrowed_date": book.borrowed_date,
+                "borrowed_by": uuid.UUID(member_id)
             }, uow.connection)
 
             if updated:
                 uow.commit()
-                return {'message': 'Book borrowed successfully'}
-            return {'error': 'Failed to borrow book'}
+                return book
+            return None
 
-    def return_book(self, book_id: int) -> dict | None:
+    def return_book(self, book_id: int) -> BookEntity | None:
         with UnitOfWork() as uow:
             assert uow.books_repo is not None
 
             book_data = uow.books_repo.get(str(book_id), uow.connection)
-
             if not book_data:
-                return {'error': 'Book not found'}
+                raise KeyError("Book not found")
 
-            book_entity: BookEntity = book_data
-            if not book_entity.is_borrowed:
-                return {'error': 'Book is not currently borrowed'}
-            book_entity.return_book()
+            book: BookEntity = book_data
+
+            if not book.is_borrowed:
+                raise ValueError("Book is not currently borrowed")
+
+            book.return_book()
 
             updated = uow.books_repo.update(str(book_id), {
                 'is_borrowed': False,
@@ -94,5 +93,5 @@ class BooksService:
 
             if updated:
                 uow.commit()
-                return {'message': 'Book returned successfully'}
-            return {'error': 'Failed to return book'}
+                return book
+            return None

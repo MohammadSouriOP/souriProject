@@ -1,71 +1,75 @@
 import uuid
-from typing import Any, Dict, Union
+from typing import List
 
-from flask import Response, abort, jsonify, make_response, request
-from flask.views import MethodView
+from fastapi import APIRouter, HTTPException
 
 from src.application.members_services import MembersService
 from src.domain.members_entity import MemberEntity
-from src.presentation.errors_handlers.member_errors import MemberErrors
+from src.domain.models.member_model import (CreateMemberModel, MemberModel,
+                                            UpdateMemberModel)
+
+router = APIRouter()
+service = MembersService()
 
 
-class MembersView(MethodView):
-    def __init__(self) -> None:
-        self.service = MembersService()
+@router.get("/", response_model=List[MemberModel])
+def get_all_members():
+    members = service.get_all() or []
 
-    def get(self, member_id: Union[uuid.UUID, str] = '') -> Response:
-        if not member_id:
-            members = self.service.get_all()
-            return make_response(jsonify(members or []), 200)
+    try:
+        return [member.to_model() for member in members]
+    except Exception as e:
+        print("DEBUG to_model() failed:", e)
+        raise HTTPException(
+            status_code=500, detail="Failed to serialize members")
 
-        try:
-            member_uuid = uuid.UUID(str(member_id))
-        except ValueError:
-            return MemberErrors.invalid_uuid()
 
-        member: Dict[int, Any] | None = self.service.get_by_id(member_uuid)
-        if member is None:
-            return MemberErrors.member_not_found()
+@router.get("/{member_id}", response_model=MemberModel)
+def get_member(member_id: str):
+    try:
+        member_uuid = uuid.UUID(member_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid UUID")
 
-        return jsonify(member)
+    member = service.get_by_id(member_uuid)
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found")
 
-    def post(self) -> Response:
-        data = request.json
-        if not data:
-            abort(400, description='Invalid data')
+    try:
+        return member.to_model()
+    except Exception as e:
+        print("DEBUG single to_model() failed:", e)
+        raise HTTPException(
+            status_code=500, detail="Failed to serialize member")
 
-        name = data.get('name', '').strip()
-        email = data.get('email', '').strip()
 
-        if not name or not email:
-            abort(400, description='Name and email cannot be empty')
+@router.post("/", response_model=MemberModel, status_code=201)
+def create_member(member_data: CreateMemberModel):
+    member = MemberEntity(name=member_data.name, email=member_data.email)
+    result = service.add(member)
+    if not result:
+        raise HTTPException(status_code=500, detail="Error adding member")
 
-        ent = MemberEntity(name=name, email=email)
-        result = self.service.add(ent)
-        if result:
-            return make_response(jsonify(result), 201)
-        abort(500, description='Error adding member')
+    try:
+        return result.to_model()
+    except Exception as e:
+        print("DEBUG create to_model() failed:", e)
+        raise HTTPException(
+            status_code=500, detail="Failed to serialize created member")
 
-    def put(self, member_id: str) -> Response:
-        member_id_str = str(member_id)
-        data = request.get_json()
-        if not data:
-            return make_response(jsonify({'error': 'Invalid JSON data'}), 400)
 
-        entity = {
-            'name': data.get('name'),
-            'email': data.get('email'),
-        }
+@router.put("/{member_id}", response_model=dict)
+def update_member(member_id: str, update_data: UpdateMemberModel):
+    update_dict = update_data.dict(exclude_unset=True)
+    result = service.update(member_id, update_dict)
+    if not result:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return {"message": "Member updated successfully"}
 
-        result = self.service.update(member_id_str, entity)
-        if not result:
-            return make_response(jsonify({'error': 'Member not found'}), 404)
-        return jsonify(message='Member updated successfully')
 
-    def delete(self, member_id: str) -> Response:
-        member_id_str = str(member_id)
-        result = self.service.delete(member_id_str)
-        if not result:
-            return make_response(jsonify({'error': 'Member not found'}), 404)
-
-        return jsonify(message='Member deleted successfully')
+@router.delete("/{member_id}", response_model=dict)
+def delete_member(member_id: str):
+    result = service.delete(member_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return {"message": "Member deleted successfully"}

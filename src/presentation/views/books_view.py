@@ -1,73 +1,55 @@
-from typing import Any, Dict
+from typing import List
 
-from flask import Response, abort, jsonify, make_response, request
-from flask.views import MethodView
+from fastapi import APIRouter, Body, HTTPException
 
 from src.application.books_services import BooksService
 from src.domain.books_entity import BookEntity
+from src.domain.models.book_model import BookModel
+
+router = APIRouter()
+service = BooksService()
 
 
-class BooksView(MethodView):
-    def __init__(self) -> None:
-        self.service = BooksService()
+@router.get("/", response_model=List[BookModel])
+def get_books():
+    books = service.get_all()
+    return [book.to_model() for book in books]
 
-    def get(self, book_id: int | None = None) -> Response:
-        if book_id is None:
-            books = self.service.get_all()
-            return make_response(jsonify(books or []), 200)
 
-        book: Dict[str, Any] | None = self.service.get_by_id(book_id)
-        if book is None:
-            abort(404, description='Book not found')
+@router.get("/{book_id}", response_model=BookModel)
+def get_book(book_id: int):
+    book = service.get_by_id(book_id)
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return book.to_model()
 
-        return jsonify(book)
 
-    def post(self) -> Response:
-        data = request.get_json()
-        if not data:
-            abort(400, description='Invalid data')
+@router.post("/", response_model=BookModel, status_code=201)
+def create_book(data: dict = Body(...)):
+    title = data.get("title")
+    author = data.get("author")
+    if not title or not author:
+        raise HTTPException(status_code=400, detail="Missing title or author")
 
-        if not all([data.get('title'), data.get('author')]):
-            abort(400, description='Required fields missing')
-        ent = BookEntity(title=data['title'], author=data['author'])
-        result = self.service.add(ent)
-        if result:
-            return make_response(jsonify(result), 201)
-        abort(500, description='Error adding book')
+    ent = BookEntity(title=title, author=author)
+    result = service.add(ent)
+    if result:
+        return result.to_model()
+    raise HTTPException(status_code=500, detail="Error adding book")
 
-    def put(self, book_id: int) -> Response:
-        data = request.get_json()
-        if not data:
-            abort(400, description='Invalid JSON data')
 
-        entity = {
-            'title': data.get('title'),
-            'author': data.get('author')
-        }
+@router.put("/{book_id}", response_model=dict)
+@router.patch("/{book_id}", response_model=dict)
+def update_book(book_id: int, data: dict = Body(...)):
+    result = service.update(book_id, data)
+    if not result:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return {"message": "Book updated successfully"}
 
-        result = self.service.update(book_id, entity)
-        if not result:
-            abort(404, description='Book not found')
-        return jsonify(message='Book updated successfully')
 
-    def patch(self, book_id: int) -> Response:
-        data = request.get_json()
-        if not data:
-            abort(400, description='Invalid JSON data')
-
-        entity = {
-            'title': data.get('title'),
-            'author': data.get('author')
-        }
-
-        result = self.service.update(book_id, entity)
-        if not result:
-            abort(404, description='Book not found')
-        return jsonify(message='Book updated successfully')
-
-    def delete(self, book_id: int) -> Response:
-        result = self.service.delete(book_id)
-        if not result:
-            abort(404, description='Book not found')
-
-        return jsonify(message='Book deleted successfully')
+@router.delete("/{book_id}", response_model=dict)
+def delete_book(book_id: int):
+    result = service.delete(book_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Book not found")
+    return {"message": "Book deleted successfully"}

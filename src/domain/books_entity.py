@@ -3,6 +3,7 @@ from datetime import datetime
 from uuid import UUID
 
 from src.domain.base_entity import BaseEntity
+from src.domain.models.book_model import BookModel
 
 
 @dataclass
@@ -27,3 +28,6 @@ class BookEntity(BaseEntity):
         self.is_borrowed = False
         self.borrowed_date = None
         self.borrowed_by = None
+
+    def to_model(self) -> BookModel:
+        return BookModel(**self.__dict__)
